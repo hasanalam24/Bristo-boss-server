@@ -42,6 +42,13 @@ async function run() {
         })
 
         //cart collections
+        app.get('/carts', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email }
+            const result = await cartCollections.find(query).toArray()
+            res.send(result)
+        })
+
         app.post('/carts', async (req, res) => {
             const cartItem = req.body;
             const result = await cartCollections.insertOne(cartItem)
