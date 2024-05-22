@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const cors = require('cors');
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const port = process.env.PORT || 5000
 
@@ -32,8 +33,25 @@ async function run() {
         const reviewsCollections = client.db("BistroDB").collection("reviews");
         const cartCollections = client.db("BistroDB").collection("carts");
 
+
+        //jwt token
+        app.post('/jwt', async (req, res) => {
+
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' })
+            res.send({ token })
+        })
+
+        //middlewares
+        const veryfyToken = (req, res, next) => {
+            console.log('inside verify token', req.headers)
+            next()
+        }
+
+
         //user related api
-        app.get('/users', async (req, res) => {
+        app.get('/users', veryfyToken, async (req, res) => {
+            // console.log(req.headers) //client side er alluser theke headers use kore token ekhane get kora hocche
             const result = await usersCollections.find().toArray()
             res.send(result)
         })
