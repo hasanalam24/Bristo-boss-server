@@ -52,9 +52,18 @@ async function run() {
             const result = await usersCollections.insertOne(user)
             res.send(result)
         })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await usersCollections.deleteOne(query)
+            res.send(result)
+        })
         //user related api end
 
 
+
+        //menu related apis
         app.get('/menu', async (req, res) => {
             const result = await menuCollections.find().toArray()
             res.send(result)
