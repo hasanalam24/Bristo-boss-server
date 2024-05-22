@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.qvnsypp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -27,9 +27,19 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+        const usersCollections = client.db("BistroDB").collection("users");
         const menuCollections = client.db("BistroDB").collection("menu");
         const reviewsCollections = client.db("BistroDB").collection("reviews");
         const cartCollections = client.db("BistroDB").collection("carts");
+
+        //user related api
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const result = await usersCollections.insertOne(user)
+            res.send(result)
+        })
+        //user related api end
+
 
         app.get('/menu', async (req, res) => {
             const result = await menuCollections.find().toArray()
@@ -55,6 +65,12 @@ async function run() {
             res.send(result)
         })
 
+        app.delete('/carts/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await cartCollections.deleteOne(query)
+            res.send(result)
+        })
 
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
