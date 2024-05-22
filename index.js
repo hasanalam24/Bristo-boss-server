@@ -59,6 +59,18 @@ async function run() {
             const result = await usersCollections.deleteOne(query)
             res.send(result)
         })
+
+        app.patch('/users/admin/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: new ObjectId(id) }
+            const updatedDoc = {
+                $set: {
+                    role: 'admin'
+                }
+            }
+            const result = await usersCollections.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
         //user related api end
 
 
