@@ -44,7 +44,7 @@ async function run() {
 
         //middlewares
         const verifyToken = (req, res, next) => {
-            console.log('inside verify token', req.headers.authorization)
+            // console.log('inside verify token', req.headers.authorization)
             if (!req.headers.authorization) {
                 return res.status(401).send({ message: 'unauthorized access' })
             }
@@ -79,7 +79,7 @@ async function run() {
         })
 
         //admin check 
-        app.get('/users/admin/:email', verifyToken, async (req, res) => {
+        app.get('/users/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email
             //check admin
             if (email !== req.decoded.email) {
@@ -116,7 +116,7 @@ async function run() {
             res.send(result)
         })
 
-        app.patch('/users/admin/:id', async (req, res) => {
+        app.patch('/users/admin/:id', verifyToken, verifyAdmin, async (req, res) => {
             const id = req.params.id
             const filter = { _id: new ObjectId(id) }
             const updatedDoc = {
