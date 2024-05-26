@@ -229,7 +229,12 @@ async function run() {
 
             //carefully delete each item from the cart
             console.log('payment info', payment)
-            res.send(paymentResult)
+
+            const query = { _id: { $in: payment.cartIds.map(id => new ObjectId(id)) } }
+
+            const deleteResult = await cartCollections.deleteMany(query)
+
+            res.send({ paymentResult, deleteResult })
         })
 
         // Send a ping to confirm a successful connection
