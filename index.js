@@ -256,8 +256,22 @@ async function run() {
             const orders = await paymentCollections.estimatedDocumentCount()
 
             //this is not best way
-            const payments = await paymentCollections.find().toArray()
-            const revenue = payments.reduce((total, payment) => total + payment.price, 0)
+            // const payments = await paymentCollections.find().toArray()
+            // const revenue = payments.reduce((total, payment) => total + payment.price, 0)
+
+            //best way
+            const result = await paymentCollections.aggregate([
+                {
+                    $group: {
+                        _id: null,
+                        totalRevenue: {
+                            $sum: '$price'
+                        }
+                    }
+                }
+            ]).toArray()
+
+            const revenue = result.length > 0 ? result[0].totalRevenue : 0
 
             res.send({ users, menuItems, orders, revenue })
         })
