@@ -48,13 +48,13 @@ async function run() {
         const verifyToken = (req, res, next) => {
             // console.log('inside verify token', req.headers.authorization)
             if (!req.headers.authorization) {
-                return res.status(401).send({ message: 'unauthorized access' })
+                return res.status(401).send({ message: 'forbidden access' })
             }
             const token = req.headers.authorization.split(' ')[1] //eta korar dhara Bearer lekha te bad diye shudhu token k nichhi
 
             jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
                 if (err) {
-                    return res.status(401).send({ message: 'unauthorized access' })
+                    return res.status(401).send({ message: 'forbidden access' })
                 }
                 req.decoded = decoded; //token er email ta ekhane ashbe
                 next()
