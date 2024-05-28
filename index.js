@@ -276,6 +276,46 @@ async function run() {
             res.send({ users, menuItems, orders, revenue })
         })
 
+        /**
+         * using categories awaise chart list
+         * ----------------------
+         * NON-Efficient Way
+         * ----------
+         * 1. load all the payments
+         * 2. for every menuItems (which is an array), go find the item form menu collection
+         * 3. for every item in the menu collection that you found from a payment entry(document)
+         * 
+         */
+
+        //Efficient Way
+        //Using aggregate pipeline
+        app.get('/order-stats', async (req, res) => {
+            const result = await paymentCollections.aggregate([
+                {
+                    $unwind: '$menuItemIds'
+                },
+                {
+                    $lookup: {
+                        from: 'menu',
+                        localField: 'menuItemIds',
+                        foreignField: '_id',
+                        as: 'menuItems'
+                    }
+                },
+                // {
+                //     $unwind: '$menuItems'
+                // },
+                // {
+                //     $group: {
+                //         _id: '$menuItems.category',
+                //         quantity: { $sum: 1 },
+                //         revenue: { $sum: '$menuItems.price' }
+                //     }
+                // }
+            ]).toArray()
+            res.send(result)
+        })
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
