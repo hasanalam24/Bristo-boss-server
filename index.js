@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         const usersCollections = client.db("BistroDB").collection("users");
         const menuCollections = client.db("BistroDB").collection("menu");
@@ -240,7 +240,7 @@ async function run() {
             const paymentResult = await paymentCollections.insertOne(payment)
 
             //carefully delete each item from the cart
-            console.log('payment info', payment)
+            // console.log('payment info', payment)
 
             const query = { _id: { $in: payment.cartIds.map(id => new ObjectId(id)) } }
 
@@ -289,30 +289,27 @@ async function run() {
 
         //Efficient Way
         //Using aggregate pipeline
-        app.get('/order-stats', async (req, res) => {
-            const result = await paymentCollections.aggregate([
-                {
-                    $unwind: '$menuItemIds'
-                },
-                {
-                    $lookup: {
-                        from: 'menu',
-                        localField: 'menuItemIds',
-                        foreignField: '_id',
-                        as: 'menuItems'
-                    }
-                },
-                // {
-                //     $unwind: '$menuItems'
-                // },
-                // {
-                //     $group: {
-                //         _id: '$menuItems.category',
-                //         quantity: { $sum: 1 },
-                //         revenue: { $sum: '$menuItems.price' }
-                //     }
-                // }
-            ]).toArray()
+        app.get('/new-prob', async (req, res) => {
+            const result = await paymentCollections
+                .aggregate([
+                    {
+                        $unwind: "$menuItemIds",
+                    },
+                    {
+                        $addFields: {
+                            menuItemObjectId: { $toObjectId: "$menuItemIds" },
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "menu",
+                            localField: "menuItemObjectId",
+                            foreignField: "_id",
+                            as: "menuItems",
+                        },
+                    },
+                ])
+                .toArray();
             res.send(result)
         })
 
