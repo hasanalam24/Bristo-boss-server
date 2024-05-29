@@ -289,7 +289,7 @@ async function run() {
 
         //Efficient Way
         //Using aggregate pipeline
-        app.get('/new-prob', async (req, res) => {
+        app.get('/order-stats', async (req, res) => {
             const result = await paymentCollections
                 .aggregate([
                     {
@@ -308,7 +308,30 @@ async function run() {
                             as: "menuItems",
                         },
                     },
+                    {
+                        $unwind: "$menuItems",
+                    },
+                    {
+                        $group: {
+                            _id: '$menuItems.category',
+                            quantity: { $sum: 1 },
+                            revenue: { $sum: '$menuItems.price' },
+
+                        }
+                    },
+                    //_id er jaigai category name change below code
+                    {
+                        $project: {
+                            _id: 0, //er mane id jabe na
+                            category: '$_id', // category name sokol id chole jabe
+                            quantity: '$quantity',
+                            revenue: '$revenue',
+
+                        }
+                    },
+
                 ])
+
                 .toArray();
             res.send(result)
         })
